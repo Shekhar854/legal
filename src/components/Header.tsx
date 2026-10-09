@@ -66,50 +66,47 @@ export default function Header() {
 
   const publicHelpItems = [
     { key: 'publicHelp.submitComplaint', href: '/public-help/submit-complaint' },
-    { key: 'publicHelp.requestAssistance', href: '/public-help/request-assistance' },
-    { key: 'publicHelp.petitions', href: '/public-help/petitions' },
+    { key: 'publicHelp.requestAssistance', href: '/public-help/submit-complaint' },
+    { key: 'publicHelp.petitions', href: '/petitions' },
     { key: 'publicHelp.trackSubmission', href: '/public-help/track-submission' },
-    { key: 'publicHelp.faq', href: '/public-help/faq' },
+    { key: 'publicHelp.faq', href: '/resources' },
   ];
 
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? 'bg-white/95 backdrop-blur-md shadow-md'
-          : 'bg-white'
+          ? 'bg-white/95 backdrop-blur-md shadow-md border-b border-[#DCE5EF]'
+          : 'bg-white border-b border-[#DCE5EF]/60'
       }`}
       role="banner"
     >
-      <div className="container">
-        <nav className="flex items-center justify-between h-[72px]" role="navigation" aria-label="Main navigation">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav className="flex items-center justify-between h-[74px]" role="navigation" aria-label="Main navigation">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 no-underline" aria-label="Legal Arjun - Home">
-            <div className="flex items-center gap-2.5">
-              <div
-                className="w-9 h-9 rounded-lg flex items-center justify-center text-white font-bold text-sm"
-                style={{ background: 'linear-gradient(135deg, #174A8B, #2F6DB5)' }}
-              >
-                LA
-              </div>
-              <div className="flex flex-col leading-tight">
-                <span className="text-lg font-bold tracking-tight" style={{ fontFamily: 'var(--font-serif)', color: 'var(--color-primary-dark)' }}>
-                  Legal Arjun
-                </span>
-                <span className="text-[10px] tracking-[0.08em] uppercase" style={{ color: 'var(--color-text-muted)' }}>
-                  Law & Public Assistance
-                </span>
-              </div>
+          <Link href="/" className="flex items-center gap-3 no-underline shrink-0 group" aria-label="Advocate Arjun Panwar - Legal Arjun Home">
+            <img
+              src="/images/logo.png"
+              alt="Advocate Arjun Panwar - Legal Arjun"
+              className="w-11 h-11 rounded-full object-cover shadow-xs border border-[#174A8B]/20 group-hover:scale-105 transition-transform"
+            />
+            <div className="flex flex-col leading-tight">
+              <span className="text-xl font-bold tracking-tight font-serif text-[#102A43] group-hover:text-[#174A8B] transition-colors">
+                Adv. Arjun Panwar
+              </span>
+              <span className="text-[10px] tracking-[0.08em] uppercase font-semibold text-[#64748B]">
+                Legal Arjun • Law & Public Assistance
+              </span>
             </div>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-1">
+          <div className="hidden lg:flex items-center gap-1 xl:gap-2">
             <Link href="/" className="nav-link">{t('nav.home')}</Link>
             <Link href="/about" className="nav-link">{t('nav.about')}</Link>
             <Link href="/practice-areas" className="nav-link">{t('nav.practiceAreas')}</Link>
             <Link href="/our-work" className="nav-link">{t('nav.ourWork')}</Link>
-            <Link href="/insights" className="nav-link">{t('nav.insights')}</Link>
+            <Link href="/blog" className="nav-link">{t('nav.insights')}</Link>
 
             {/* Resources Dropdown */}
             <div ref={resourcesRef} className="relative">
@@ -241,7 +238,7 @@ export default function Header() {
             <Link href="/about" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>{t('nav.about')}</Link>
             <Link href="/practice-areas" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>{t('nav.practiceAreas')}</Link>
             <Link href="/our-work" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>{t('nav.ourWork')}</Link>
-            <Link href="/insights" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>{t('nav.insights')}</Link>
+            <Link href="/blog" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>{t('nav.insights')}</Link>
 
             {/* Mobile Resources */}
             <div>

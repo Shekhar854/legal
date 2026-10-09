@@ -18,7 +18,7 @@ export const translations = {
     'nav.about': 'About',
     'nav.practiceAreas': 'Practice Areas',
     'nav.ourWork': 'Our Work',
-    'nav.insights': 'Insights',
+    'nav.insights': 'Blog',
     'nav.resources': 'Resources',
     'nav.publicHelp': 'Public Help',
     'nav.contact': 'Contact',
@@ -82,13 +82,13 @@ export const translations = {
     'assistance.resources.desc': 'Access guides, FAQs, and legal information in simple, understandable language.',
     'assistance.disclaimer': 'Submitting a complaint through this platform does not constitute filing an FIR, court case, or official government grievance.',
 
-    // Insights
-    'insights.badge': 'Latest Insights',
-    'insights.title': 'Legal Articles & Analysis',
-    'insights.subtitle': 'Stay informed with articles on important legal topics, recent developments, and practical guidance.',
-    'insights.readArticle': 'Read Article',
+    // Blog / Insights
+    'insights.badge': 'Legal Blog',
+    'insights.title': 'Legal Blog & Citizen Guides',
+    'insights.subtitle': 'Plain-language legal explanations, statutory awareness, and public assistance guides for citizens across India.',
+    'insights.readArticle': 'Read Guide',
     'insights.readTime': 'min read',
-    'insights.viewAll': 'View All Articles',
+    'insights.viewAll': 'View All Blog Posts',
 
     // Resources
     'featuredResources.badge': 'Resources',
@@ -145,7 +145,7 @@ export const translations = {
     'nav.about': 'हमारे बारे में',
     'nav.practiceAreas': 'प्रैक्टिस क्षेत्र',
     'nav.ourWork': 'हमारा कार्य',
-    'nav.insights': 'विचार और लेख',
+    'nav.insights': 'ब्लॉग',
     'nav.resources': 'संसाधन',
     'nav.publicHelp': 'सार्वजनिक सहायता',
     'nav.contact': 'संपर्क करें',
@@ -209,13 +209,13 @@ export const translations = {
     'assistance.resources.desc': 'सरल, समझने योग्य भाषा में गाइड, FAQ और कानूनी जानकारी प्राप्त करें।',
     'assistance.disclaimer': 'इस प्लेटफ़ॉर्म के माध्यम से शिकायत दर्ज करना FIR, अदालती मामला, या आधिकारिक सरकारी शिकायत दर्ज करने के बराबर नहीं है।',
 
-    // Insights
-    'insights.badge': 'नवीनतम विचार',
-    'insights.title': 'कानूनी लेख और विश्लेषण',
-    'insights.subtitle': 'महत्वपूर्ण कानूनी विषयों, हालिया विकासों और व्यावहारिक मार्गदर्शन पर लेखों के साथ सूचित रहें।',
-    'insights.readArticle': 'लेख पढ़ें',
+    // Insights / Blog
+    'insights.badge': 'कानूनी ब्लॉग',
+    'insights.title': 'कानूनी ब्लॉग और नागरिक गाइड',
+    'insights.subtitle': 'भारतीय नागरिकों के लिए सरल कानूनी व्याख्या, वैधानिक जागरूकता और जन सहायता गाइड।',
+    'insights.readArticle': 'गाइड पढ़ें',
     'insights.readTime': 'मिनट पढ़ें',
-    'insights.viewAll': 'सभी लेख देखें',
+    'insights.viewAll': 'सभी ब्लॉग पोस्ट देखें',
 
     // Resources
     'featuredResources.badge': 'संसाधन',
