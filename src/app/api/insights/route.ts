@@ -45,7 +45,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { title, title_hi, summary, summary_hi, content, content_hi, category, tags, status } = body;
+    const { title, title_hi, summary, summary_hi, content, content_hi, category, tags, status, cover_image } = body;
 
     if (!title || !summary || !content || !category) {
       return NextResponse.json({ error: 'Title, summary, content, and category are required' }, { status: 400 });
@@ -60,8 +60,8 @@ export async function POST(request: Request) {
     const readTime = `${Math.max(1, Math.ceil(words / 200))} min read`;
 
     const result = db.prepare(`
-      INSERT INTO articles (slug, title, title_hi, summary, summary_hi, content, content_hi, category, author, status, read_time, tags)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO articles (slug, title, title_hi, summary, summary_hi, content, content_hi, category, author, status, read_time, tags, cover_image)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       slug,
       title.trim(),
@@ -74,7 +74,8 @@ export async function POST(request: Request) {
       user.name,
       status || 'published',
       readTime,
-      tags?.trim() || ''
+      tags?.trim() || '',
+      cover_image?.trim() || null
     );
 
     db.prepare(`
@@ -88,3 +89,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to create article' }, { status: 500 });
   }
 }
+

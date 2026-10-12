@@ -6,6 +6,7 @@ export interface UserSession {
   id: number;
   name: string;
   email: string;
+  phone?: string | null;
   role: string;
 }
 
@@ -37,11 +38,11 @@ export async function getCurrentUser(): Promise<UserSession | null> {
     if (!token) return null;
 
     const row = db.prepare(`
-      SELECT u.id, u.name, u.email, u.role, s.expires_at
+      SELECT u.id, u.name, u.email, u.phone, u.role, s.expires_at
       FROM sessions s
       JOIN users u ON s.user_id = u.id
       WHERE s.token = ?
-    `).get(token) as { id: number; name: string; email: string; role: string; expires_at: string } | undefined;
+    `).get(token) as { id: number; name: string; email: string; phone?: string; role: string; expires_at: string } | undefined;
 
     if (!row) return null;
     if (new Date(row.expires_at) < new Date()) {
@@ -53,6 +54,7 @@ export async function getCurrentUser(): Promise<UserSession | null> {
       id: row.id,
       name: row.name,
       email: row.email,
+      phone: row.phone || null,
       role: row.role,
     };
   } catch {

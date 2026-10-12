@@ -1,12 +1,34 @@
 import Database from 'better-sqlite3';
 import path from 'path';
+import fs from 'fs';
 import crypto from 'crypto';
 
-const dbPath = path.join(process.cwd(), 'legalarjun.db');
+const isVercel = process.env.VERCEL === '1' || process.env.AWS_LAMBDA_FUNCTION_NAME !== undefined;
+
+let dbPath: string;
+
+if (isVercel) {
+  dbPath = path.join('/tmp', 'legalarjun.db');
+  const sourcePath = path.join(process.cwd(), 'legalarjun.db');
+  try {
+    if (!fs.existsSync(dbPath) && fs.existsSync(sourcePath)) {
+      fs.copyFileSync(sourcePath, dbPath);
+    }
+  } catch (copyErr) {
+    console.error('Failed to copy db to /tmp:', copyErr);
+  }
+} else {
+  dbPath = path.join(process.cwd(), 'legalarjun.db');
+}
+
 const db = new Database(dbPath);
 
-// Enable WAL mode for high concurrency
-db.pragma('journal_mode = WAL');
+// Enable WAL mode when possible
+try {
+  db.pragma('journal_mode = WAL');
+} catch (e) {
+  // Ignored in serverless containers
+}
 
 // Initialize schema
 db.exec(`
@@ -161,6 +183,41 @@ db.exec(`
   );
 `);
 
+// Migrations: add cover_image column if it doesn't exist
+try {
+  db.prepare("SELECT cover_image FROM articles LIMIT 1").get();
+} catch {
+  db.exec("ALTER TABLE articles ADD COLUMN cover_image TEXT DEFAULT NULL");
+}
+
+// Migrations: add phone columns to users if they don't exist
+try {
+  db.prepare("SELECT phone FROM users LIMIT 1").get();
+} catch {
+  try {
+    db.exec("ALTER TABLE users ADD COLUMN phone TEXT");
+  } catch {}
+  try {
+    db.exec("ALTER TABLE users ADD COLUMN is_phone_verified INTEGER DEFAULT 0");
+  } catch {}
+}
+
+// Ensure email_otps table exists for 2-Factor Authentication
+db.exec(`
+  CREATE TABLE IF NOT EXISTS email_otps (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL,
+    otp_code TEXT NOT NULL,
+    temp_token TEXT NOT NULL UNIQUE,
+    user_id INTEGER NOT NULL,
+    expires_at DATETIME NOT NULL,
+    attempts INTEGER DEFAULT 0,
+    verified INTEGER DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE INDEX IF NOT EXISTS idx_email_otps_token ON email_otps(temp_token);
+`);
+
 // Password hashing helpers using native crypto PBKDF2
 export function hashPassword(password: string): string {
   const salt = 'legal_arjun_salt_2026';
@@ -173,18 +230,37 @@ export function verifyPassword(password: string, hash: string): boolean {
 
 // Seed initial data if empty
 function seedDatabase() {
+  const arjunPass = hashPassword('Arjun@1234');
+  const adminEmails = [
+    { email: 'Arjun@legal', name: 'Adv. Arjun Panwar (Super Admin)' },
+    { email: 'impzccc@gmail.com', name: 'Adv. Arjun Panwar (Admin)' },
+    { email: 'thatherashekhar@gmail.com', name: 'Adv. Arjun Panwar (Admin)' },
+  ];
+
+  for (const item of adminEmails) {
+    const existing = db.prepare('SELECT id FROM users WHERE LOWER(email) = LOWER(?)').get(item.email) as { id: number } | undefined;
+    if (!existing) {
+      db.prepare(`
+        INSERT INTO users (name, email, password_hash, role)
+        VALUES (?, ?, ?, 'super_admin')
+      `).run(item.name, item.email, arjunPass);
+    } else {
+      db.prepare('UPDATE users SET password_hash = ?, role = ? WHERE id = ?').run(arjunPass, 'super_admin', existing.id);
+    }
+  }
+
   const userCount = db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number };
-  if (userCount.count === 0) {
+  if (userCount.count <= 3) {
     const adminPass = hashPassword('Admin@2026!');
     db.prepare(`
-      INSERT INTO users (name, email, password_hash, role)
-      VALUES (?, ?, ?, ?)
-    `).run('Adv. Arjun Panwar (Admin)', 'admin@legalarjun.com', adminPass, 'super_admin');
+      INSERT OR IGNORE INTO users (name, email, password_hash, role)
+      VALUES (?, ?, ?, 'super_admin')
+    `).run('Adv. Arjun Panwar (Admin)', 'admin@legalarjun.com', adminPass);
 
     db.prepare(`
-      INSERT INTO users (name, email, password_hash, role)
-      VALUES (?, ?, ?, ?)
-    `).run('Pooja Verma (Complaint Manager)', 'pooja@legalarjun.com', hashPassword('Staff@2026!'), 'complaint_manager');
+      INSERT OR IGNORE INTO users (name, email, password_hash, role)
+      VALUES (?, ?, ?, 'complaint_manager')
+    `).run('Pooja Verma (Complaint Manager)', 'pooja@legalarjun.com', hashPassword('Staff@2026!'));
   }
 
   // Seed Practice Areas

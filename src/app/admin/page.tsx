@@ -29,6 +29,7 @@ import {
   User,
   Users
 } from 'lucide-react';
+import BlogEditorTab from '@/components/BlogEditorTab';
 
 export default function AdminDashboardPage() {
   const router = useRouter();
@@ -54,14 +55,7 @@ export default function AdminDashboardPage() {
   // Contact inquiries
   const [inquiries, setInquiries] = useState<any[]>([]);
 
-  // New Article Form
-  const [artTitle, setArtTitle] = useState('');
-  const [artTitleHi, setArtTitleHi] = useState('');
-  const [artCategory, setArtCategory] = useState('Consumer Rights');
-  const [artSummary, setArtSummary] = useState('');
-  const [artContent, setArtContent] = useState('');
-  const [artTags, setArtTags] = useState('Legal Guide, Rights, 2026');
-  const [publishing, setPublishing] = useState(false);
+  // Publish success message
   const [pubSuccess, setPubSuccess] = useState<string | null>(null);
 
   useEffect(() => {
@@ -156,42 +150,7 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // Publish new article
-  const handlePublishArticle = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setPublishing(true);
-    setPubSuccess(null);
-    try {
-      const res = await fetch('/api/insights', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: artTitle,
-          title_hi: artTitleHi,
-          summary: artSummary,
-          content: artContent,
-          category: artCategory,
-          tags: artTags,
-          status: 'published',
-        }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setPubSuccess(`Article published successfully! Slug: ${data.slug}`);
-        setArtTitle('');
-        setArtTitleHi('');
-        setArtSummary('');
-        setArtContent('');
-        loadDashboardData();
-      } else {
-        alert(data.error || 'Failed to publish');
-      }
-    } catch (err: any) {
-      alert(err.message || 'Error publishing article');
-    } finally {
-      setPublishing(false);
-    }
-  };
+
 
   if (authLoading) {
     return (
@@ -746,124 +705,16 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        {/* TAB 4: PUBLISH ARTICLE */}
+        {/* TAB 4: PUBLISH BLOG POST — Rich Editor with Media Uploads */}
         {activeTab === 'publish' && (
-          <div className="bg-white rounded-xl p-8 border border-[#DCE5EF] shadow-xs space-y-6 max-w-4xl mx-auto animate-in fade-in duration-200">
-            <div>
-              <h2 className="text-xl font-serif font-bold text-[#102A43]">
-                Publish New Legal Blog Post / Plain-Language Guide
-              </h2>
-              <p className="text-xs text-[#64748B]">
-                Articles are published immediately to the public /blog page with compliant BCI Rule 36 disclaimers.
-              </p>
-            </div>
-
-            {pubSuccess && (
-              <div className="p-4 rounded-xl bg-green-50 border border-green-200 text-green-700 text-xs flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 shrink-0" />
-                <p>{pubSuccess}</p>
-              </div>
-            )}
-
-            <form onSubmit={handlePublishArticle} className="space-y-5">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#102A43] mb-1.5">
-                  Article Title (English) <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Critical Pre-Litigation Steps Under the Consumer Protection Act, 2019"
-                  value={artTitle}
-                  onChange={(e) => setArtTitle(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-lg border border-[#DCE5EF] text-sm focus:outline-hidden focus:border-[#174A8B]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#102A43] mb-1.5">
-                  Article Title (Hindi / हिन्दी)
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. उपभोक्ता संरक्षण अधिनियम 2019 के अंतर्गत आवश्यक पूर्व-मुकदमा कदम"
-                  value={artTitleHi}
-                  onChange={(e) => setArtTitleHi(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-lg border border-[#DCE5EF] text-sm focus:outline-hidden focus:border-[#174A8B]"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#102A43] mb-1.5">
-                    Category <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    value={artCategory}
-                    onChange={(e) => setArtCategory(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-lg border border-[#DCE5EF] text-sm bg-white focus:outline-hidden"
-                  >
-                    <option value="Data Privacy & Technology">Data Privacy & Technology</option>
-                    <option value="Consumer Rights">Consumer Rights</option>
-                    <option value="Property & Real Estate">Property & Real Estate</option>
-                    <option value="Constitutional Law">Constitutional Law</option>
-                    <option value="Employment & Labour Rights">Employment & Labour Rights</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#102A43] mb-1.5">
-                    Tags (Comma Separated)
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Consumer Protection, e-Daakhil, Guidance"
-                    value={artTags}
-                    onChange={(e) => setArtTags(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-lg border border-[#DCE5EF] text-sm focus:outline-hidden"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#102A43] mb-1.5">
-                  Summary / Lead Paragraph <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                  required
-                  rows={2}
-                  placeholder="A concise 2-sentence summary of the legal issue and its importance for citizens."
-                  value={artSummary}
-                  onChange={(e) => setArtSummary(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-lg border border-[#DCE5EF] text-sm focus:outline-hidden"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#102A43] mb-1.5">
-                  Article Body (Use ### for headings, - for bullet points) <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                  required
-                  rows={8}
-                  placeholder="### Statutory Framework&#10;&#10;Write comprehensive educational paragraphs..."
-                  value={artContent}
-                  onChange={(e) => setArtContent(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-lg border border-[#DCE5EF] text-sm focus:outline-hidden font-mono text-xs"
-                />
-              </div>
-
-              <div>
-                <button
-                  type="submit"
-                  disabled={publishing}
-                  className="px-6 py-2.5 rounded-lg bg-[#174A8B] hover:bg-[#102A43] text-white font-semibold text-sm transition-colors cursor-pointer shadow-sm disabled:opacity-50"
-                >
-                  {publishing ? 'Publishing Blog Post...' : 'Publish to Public Blog'}
-                </button>
-              </div>
-            </form>
-          </div>
+          <BlogEditorTab
+            onPublishSuccess={(slug: string) => {
+              setPubSuccess(`Article published successfully! Slug: ${slug}`);
+              loadDashboardData();
+            }}
+            pubSuccess={pubSuccess}
+            onClearSuccess={() => setPubSuccess(null)}
+          />
         )}
 
         {/* TAB 5: INQUIRIES */}

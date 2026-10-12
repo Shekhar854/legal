@@ -2,7 +2,7 @@ import ClientLayout from '@/components/ClientLayout';
 import Link from 'next/link';
 import db from '@/lib/db';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, BookOpen, Calendar, Clock, Share2, ShieldAlert, Tag, User } from 'lucide-react';
+import { ArrowLeft, BookOpen, Calendar, Clock, FileText, Share2, ShieldAlert, Tag, User } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,10 +22,133 @@ export default async function BlogDetailPage({
   // Related articles in same category
   const related = db.prepare('SELECT * FROM articles WHERE slug != ? AND category = ? LIMIT 2').all(slug, article.category) as any[];
 
+  // Parse content blocks for rendering
+  const renderContentBlock = (paragraph: string, idx: number) => {
+    // Image: ![alt](url)
+    const imageMatch = paragraph.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+    if (imageMatch) {
+      return (
+        <figure key={idx} className="my-6">
+          <img
+            src={imageMatch[2]}
+            alt={imageMatch[1]}
+            className="w-full rounded-lg border border-[#DCE5EF] shadow-sm"
+          />
+          {imageMatch[1] && (
+            <figcaption className="text-xs text-[#64748B] text-center mt-2 italic">
+              {imageMatch[1]}
+            </figcaption>
+          )}
+        </figure>
+      );
+    }
+
+    // Video: [VIDEO](url)
+    const videoMatch = paragraph.match(/^\[VIDEO\]\(([^)]+)\)$/);
+    if (videoMatch) {
+      return (
+        <div key={idx} className="my-6">
+          <video
+            src={videoMatch[1]}
+            controls
+            className="w-full rounded-lg border border-[#DCE5EF] shadow-sm"
+          />
+        </div>
+      );
+    }
+
+    // PDF/Document link: [📄 filename](url)
+    const docMatch = paragraph.match(/^\[📄\s*([^\]]+)\]\(([^)]+)\)$/);
+    if (docMatch) {
+      return (
+        <a
+          key={idx}
+          href={docMatch[2]}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="my-4 flex items-center gap-3 p-4 rounded-lg bg-[#EAF3FC] border border-[#174A8B]/20 hover:bg-[#DCE5EF] transition-colors"
+        >
+          <FileText className="w-8 h-8 text-[#174A8B] shrink-0" />
+          <div>
+            <span className="text-sm font-semibold text-[#102A43] block">{docMatch[1]}</span>
+            <span className="text-xs text-[#64748B]">Click to view or download document</span>
+          </div>
+        </a>
+      );
+    }
+
+    // Heading H2: ### text
+    if (paragraph.startsWith('### ')) {
+      return (
+        <h3 key={idx} className="text-2xl font-serif font-bold text-[#102A43] pt-6 pb-2 border-b border-[#DCE5EF]">
+          {paragraph.replace('### ', '')}
+        </h3>
+      );
+    }
+
+    // Heading H3: #### text
+    if (paragraph.startsWith('#### ')) {
+      return (
+        <h4 key={idx} className="text-xl font-serif font-bold text-[#102A43] pt-4">
+          {paragraph.replace('#### ', '')}
+        </h4>
+      );
+    }
+
+    // Blockquote: > text
+    if (paragraph.startsWith('> ')) {
+      return (
+        <blockquote key={idx} className="pl-4 border-l-4 border-[#174A8B] text-[#64748B] italic my-4 text-sm sm:text-base">
+          {paragraph.replace(/^> /, '')}
+        </blockquote>
+      );
+    }
+
+    // List items
+    if (paragraph.startsWith('- ') || paragraph.startsWith('* ') || /^\d+\.\s/.test(paragraph)) {
+      const items = paragraph.split('\n');
+      const isOrdered = /^\d+\./.test(items[0]);
+      const ListTag = isOrdered ? 'ol' : 'ul';
+      return (
+        <ListTag key={idx} className={`space-y-2 ${isOrdered ? 'list-decimal' : 'list-disc'} pl-5 text-sm sm:text-base text-[#263445]`}>
+          {items.map((it: string, i: number) => (
+            <li key={i} dangerouslySetInnerHTML={{ __html: formatInlineText(it.replace(/^[-*]\s*|\d+\.\s*/, '')) }} />
+          ))}
+        </ListTag>
+      );
+    }
+
+    // Regular paragraph with inline formatting
+    return (
+      <p key={idx} className="text-sm sm:text-base text-[#263445] leading-relaxed" dangerouslySetInnerHTML={{ __html: formatInlineText(paragraph) }} />
+    );
+  };
+
+  // Format inline text (bold, italic, links, inline images)
+  function formatInlineText(text: string): string {
+    return text
+      .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="inline-block rounded my-2 max-w-full" />')
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-[#174A8B] underline font-medium" target="_blank" rel="noopener noreferrer">$1</a>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>');
+  }
+
   return (
     <ClientLayout>
+      {/* Cover Image Banner */}
+      {article.cover_image && (
+        <div className="relative w-full h-64 sm:h-80 lg:h-96 overflow-hidden">
+          <img
+            src={article.cover_image}
+            alt={article.title}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#102A43]/60 via-[#102A43]/30 to-[#102A43]" />
+        </div>
+      )}
+
       {/* Blog Header */}
-      <section className="bg-gradient-to-b from-[#102A43] to-[#174A8B] text-white py-16 lg:py-20">
+      <section className={`bg-gradient-to-b from-[#102A43] to-[#174A8B] text-white ${article.cover_image ? 'py-10 lg:py-14 -mt-20 relative z-10' : 'py-16 lg:py-20'}`}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <Link
             href="/blog"
@@ -84,39 +207,9 @@ export default async function BlogDetailPage({
               {article.summary}
             </div>
 
-            {/* Content formatted with clean typography */}
+            {/* Content with proper media rendering */}
             <div className="prose prose-slate max-w-none text-[#263445] leading-relaxed space-y-6 text-base sm:text-lg">
-              {article.content.split('\n\n').map((paragraph: string, idx: number) => {
-                if (paragraph.startsWith('### ')) {
-                  return (
-                    <h3 key={idx} className="text-2xl font-serif font-bold text-[#102A43] pt-6 pb-2 border-b border-[#DCE5EF]">
-                      {paragraph.replace('### ', '')}
-                    </h3>
-                  );
-                }
-                if (paragraph.startsWith('#### ')) {
-                  return (
-                    <h4 key={idx} className="text-xl font-serif font-bold text-[#102A43] pt-4">
-                      {paragraph.replace('#### ', '')}
-                    </h4>
-                  );
-                }
-                if (paragraph.startsWith('- ') || paragraph.startsWith('1. ') || paragraph.startsWith('* ')) {
-                  const items = paragraph.split('\n');
-                  return (
-                    <ul key={idx} className="space-y-2 list-disc pl-5 text-sm sm:text-base text-[#263445]">
-                      {items.map((it: string, i: number) => (
-                        <li key={i}>{it.replace(/^[-*]|\d+\.\s*/, '')}</li>
-                      ))}
-                    </ul>
-                  );
-                }
-                return (
-                  <p key={idx} className="text-sm sm:text-base text-[#263445] leading-relaxed">
-                    {paragraph}
-                  </p>
-                );
-              })}
+              {article.content.split('\n\n').map((paragraph: string, idx: number) => renderContentBlock(paragraph.trim(), idx))}
             </div>
 
             {/* Tags */}
@@ -155,17 +248,28 @@ export default async function BlogDetailPage({
                   <Link
                     key={rel.slug}
                     href={`/blog/${rel.slug}`}
-                    className="bg-white p-6 rounded-xl border border-[#DCE5EF] hover:border-[#174A8B]/40 hover:shadow-md transition-all block group"
+                    className="bg-white rounded-xl overflow-hidden border border-[#DCE5EF] hover:border-[#174A8B]/40 hover:shadow-md transition-all block group"
                   >
-                    <span className="text-xs font-semibold text-[#174A8B] uppercase tracking-wider block mb-2">
-                      {rel.category}
-                    </span>
-                    <h4 className="font-serif font-bold text-lg text-[#102A43] group-hover:text-[#174A8B] transition-colors mb-2">
-                      {rel.title}
-                    </h4>
-                    <p className="text-xs text-[#64748B] line-clamp-2">
-                      {rel.summary}
-                    </p>
+                    {rel.cover_image && (
+                      <div className="h-36 overflow-hidden">
+                        <img
+                          src={rel.cover_image}
+                          alt={rel.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
+                    )}
+                    <div className="p-6">
+                      <span className="text-xs font-semibold text-[#174A8B] uppercase tracking-wider block mb-2">
+                        {rel.category}
+                      </span>
+                      <h4 className="font-serif font-bold text-lg text-[#102A43] group-hover:text-[#174A8B] transition-colors mb-2">
+                        {rel.title}
+                      </h4>
+                      <p className="text-xs text-[#64748B] line-clamp-2">
+                        {rel.summary}
+                      </p>
+                    </div>
                   </Link>
                 ))}
               </div>
@@ -176,3 +280,4 @@ export default async function BlogDetailPage({
     </ClientLayout>
   );
 }
+

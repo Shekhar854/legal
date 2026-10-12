@@ -144,6 +144,20 @@ export default function BlogPage() {
                   key={art.slug}
                   className="bg-white rounded-xl overflow-hidden border border-[#DCE5EF] hover:border-[#174A8B]/40 hover:shadow-lg transition-all flex flex-col justify-between group"
                 >
+                  {/* Cover Image */}
+                  {art.cover_image && (
+                    <Link href={`/blog/${art.slug}`}>
+                      <div className="relative h-48 overflow-hidden">
+                        <img
+                          src={art.cover_image}
+                          alt={art.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                      </div>
+                    </Link>
+                  )}
+
                   <div className="p-7">
                     <div className="flex items-center justify-between text-xs text-[#64748B] mb-4">
                       <span className="px-3 py-1 rounded-full bg-[#EAF3FC] text-[#174A8B] font-semibold text-[11px]">

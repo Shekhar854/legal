@@ -77,6 +77,18 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const status = searchParams.get('status');
 
+  // If citizen, only return their own complaints
+  if (user.role === 'citizen') {
+    const cleanPhone = user.phone ? user.phone.slice(-10) : '';
+    const complaints = db.prepare(`
+      SELECT * FROM complaints 
+      WHERE (phone LIKE ? OR email = ?)
+      ORDER BY created_at DESC
+    `).all(`%${cleanPhone}%`, user.email);
+    return NextResponse.json({ complaints });
+  }
+
+  // Admin users can view all complaints
   let query = 'SELECT * FROM complaints';
   const params: string[] = [];
 

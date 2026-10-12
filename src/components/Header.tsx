@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useLocale } from '@/contexts/LocaleContext';
 import { locales, localeNames, Locale } from '@/lib/i18n';
+import { Smartphone, User } from 'lucide-react';
 
 export default function Header() {
   const { locale, setLocale, t } = useLocale();
@@ -14,6 +15,18 @@ export default function Header() {
   const [mobilePublicHelpOpen, setMobilePublicHelpOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
+  const [userSession, setUserSession] = useState<{ id: number; name: string; role: string } | null>(null);
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.authenticated && data?.user) {
+          setUserSession(data.user);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const resourcesRef = useRef<HTMLDivElement>(null);
   const publicHelpRef = useRef<HTMLDivElement>(null);
@@ -74,11 +87,10 @@ export default function Header() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
           ? 'bg-white/95 backdrop-blur-md shadow-md border-b border-[#DCE5EF]'
           : 'bg-white border-b border-[#DCE5EF]/60'
-      }`}
+        }`}
       role="banner"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -95,7 +107,7 @@ export default function Header() {
                 Adv. Arjun Panwar
               </span>
               <span className="text-[10px] tracking-[0.08em] uppercase font-semibold text-[#64748B]">
-                Legal Arjun • Law & Public Assistance
+                Legal Arjun
               </span>
             </div>
           </Link>
@@ -204,6 +216,18 @@ export default function Header() {
               )}
             </div>
 
+            {/* Admin Session Badge (if logged in) */}
+            {userSession && (
+              <Link
+                href="/admin"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md border border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100 transition-colors"
+                title={`Signed in as ${userSession.name}`}
+              >
+                <User className="w-3.5 h-3.5" />
+                <span className="max-w-[110px] truncate">{userSession.name.split(' ')[0]} (Admin)</span>
+              </Link>
+            )}
+
             {/* CTA Button */}
             <Link href="/public-help/submit-complaint" className="btn btn-primary btn-sm hidden md:inline-flex">
               {t('nav.submitComplaint')}
@@ -299,7 +323,17 @@ export default function Header() {
 
             <Link href="/contact" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>{t('nav.contact')}</Link>
 
-            <div className="pt-4">
+            <div className="pt-4 space-y-2">
+              {userSession && (
+                <Link
+                  href="/admin"
+                  className="btn btn-outline w-full justify-center text-xs"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Chambers Admin Console
+                </Link>
+              )}
+
               <Link
                 href="/public-help/submit-complaint"
                 className="btn btn-primary w-full justify-center"

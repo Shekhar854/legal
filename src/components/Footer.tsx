@@ -61,7 +61,7 @@ export default function Footer() {
     { label: t('footer.privacy'), href: '/privacy' },
     { label: t('footer.terms'), href: '/terms' },
     { label: t('footer.accessibility'), href: '/accessibility' },
-    { label: 'Chambers Admin Console', href: '/admin/login' },
+    { label: 'Admin Login (Chambers Console)', href: '/admin/login' },
   ];
 
   return (
@@ -264,6 +264,14 @@ export default function Footer() {
               <span>•</span>
               <Link href="/accessibility" className="hover:text-white transition-colors">
                 Universal Accessibility
+              </Link>
+              <span>•</span>
+              <Link
+                href="/admin/login"
+                className="hover:text-amber-300 inline-flex items-center gap-1.5 transition-colors text-amber-200/90 font-medium"
+              >
+                <Lock className="w-3 h-3 text-amber-400" />
+                Admin Login
               </Link>
               <span>•</span>
               <button
