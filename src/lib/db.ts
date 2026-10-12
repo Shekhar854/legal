@@ -233,8 +233,9 @@ function seedDatabase() {
   const arjunPass = hashPassword('Arjun@1234');
   const adminEmails = [
     { email: 'Arjun@legal', name: 'Adv. Arjun Panwar (Super Admin)' },
-    { email: 'impzccc@gmail.com', name: 'Adv. Arjun Panwar (Admin)' },
+    { email: 'shekharthathera@gmail.com', name: 'Adv. Arjun Panwar (Super Admin)' },
     { email: 'thatherashekhar@gmail.com', name: 'Adv. Arjun Panwar (Admin)' },
+    { email: 'impzccc@gmail.com', name: 'Adv. Arjun Panwar (Admin)' },
   ];
 
   for (const item of adminEmails) {
