@@ -84,7 +84,40 @@ export async function sendEmailOtp(toEmail: string, otpCode: string): Promise<Se
     </html>
   `;
 
-  // 1. Try Resend HTTP API over Port 443 (works seamlessly on Render without SMTP port blocks)
+  // 1. Try Brevo HTTP API over Port 443 (supports sending to ANY recipient without domain verification)
+  if (process.env.BREVO_API_KEY) {
+    try {
+      const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'api-key': process.env.BREVO_API_KEY.trim(),
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          sender: { name: 'Adv. Arjun Panwar Chambers', email: process.env.BREVO_SENDER || 'shekharthathera@gmail.com' },
+          to: [{ email: toEmail }],
+          subject: `[${otpCode}] Your Chambers Admin Login Verification Code`,
+          htmlContent: htmlContent,
+        }),
+      });
+
+      if (res.ok) {
+        console.log(`[BREVO API SUCCESS] Sent OTP email to ${toEmail}`);
+        return {
+          success: true,
+          message: `A 6-digit verification code has been sent to your email (${toEmail}).`,
+        };
+      } else {
+        const errText = await res.text();
+        console.error(`[BREVO API ERROR]: ${errText}`);
+      }
+    } catch (e: any) {
+      console.error('[BREVO API NETWORK ERROR]', e);
+    }
+  }
+
+  // 2. Try Resend HTTP API over Port 443 (works seamlessly on Render without SMTP port blocks)
   const defaultResendKey = Buffer.from('cmVfWDNRWUs5SldfMk1oSDJZcWQ0d2pHZkF1TXdkaUhHQVNG', 'base64').toString('ascii');
   const resendApiKey = (process.env.RESEND_API_KEY || defaultResendKey).trim();
   if (resendApiKey) {
