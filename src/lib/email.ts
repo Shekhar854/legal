@@ -85,13 +85,14 @@ export async function sendEmailOtp(toEmail: string, otpCode: string): Promise<Se
     </html>
   `;
 
-  // 1. Try Resend HTTP API over Port 443 if RESEND_API_KEY is configured (works on all cloud tiers)
-  if (process.env.RESEND_API_KEY) {
+  // 1. Try Resend HTTP API over Port 443 (works seamlessly on Render without SMTP port blocks)
+  const resendApiKey = process.env.RESEND_API_KEY?.trim();
+  if (resendApiKey) {
     try {
       const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${process.env.RESEND_API_KEY.trim()}`,
+          'Authorization': `Bearer ${resendApiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({

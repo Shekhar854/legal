@@ -19,3 +19,5 @@ services:
         value: zkcrjwnrojzhdtew
       - key: ADMIN_EMAIL
         value: shekharthathera@gmail.com
+      - key: RESEND_API_KEY
+        sync: false
