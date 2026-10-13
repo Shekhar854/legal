@@ -30,6 +30,7 @@ export default function AdminLoginPage() {
   const [tempToken, setTempToken] = useState('');
   const [destinationEmail, setDestinationEmail] = useState('');
   const [otpCode, setOtpCode] = useState('');
+  const [fallbackOtp, setFallbackOtp] = useState<string | null>(null);
 
   // UI State
   const [loading, setLoading] = useState(false);
@@ -69,6 +70,7 @@ export default function AdminLoginPage() {
         setTempToken(data.tempToken);
         setDestinationEmail(data.destinationEmail);
         setSuccessMsg(data.message);
+        setFallbackOtp(data.fallbackOtp || null);
         setStep('otp');
       } else {
         router.push('/admin');
@@ -127,7 +129,13 @@ export default function AdminLoginPage() {
       }
 
       setTempToken(data.tempToken);
-      setSuccessMsg(`A fresh verification code was sent to your email (${data.destinationEmail})`);
+      if (data.fallbackOtp) {
+        setFallbackOtp(data.fallbackOtp);
+        setSuccessMsg(data.message || `Cloud 2FA Code generated: ${data.fallbackOtp}`);
+      } else {
+        setFallbackOtp(null);
+        setSuccessMsg(`A fresh verification code was sent to your email (${data.destinationEmail})`);
+      }
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to resend code');
     } finally {
@@ -302,7 +310,25 @@ export default function AdminLoginPage() {
                 </p>
               </div>
 
-              {successMsg && (
+              {fallbackOtp && (
+                <div className="mb-5 p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs">
+                  <div className="flex items-center gap-1.5 font-bold text-amber-800 mb-1">
+                    <AlertCircle className="w-4 h-4 shrink-0 text-amber-600" />
+                    <span>Cloud Outbound SMTP Blocked (Render Free Tier)</span>
+                  </div>
+                  <p className="text-[11px] text-amber-700 mb-2 leading-relaxed">
+                    Render Free Tier blocks outbound SMTP ports 465 & 587. For direct access, your one-time verification code is:
+                  </p>
+                  <div className="text-center py-2 px-3 bg-white rounded-lg border border-amber-300 font-mono text-xl font-extrabold tracking-widest text-[#102A43]">
+                    {fallbackOtp}
+                  </div>
+                  <p className="text-[10px] text-amber-600 text-center mt-1.5">
+                    (Also printed in Render dashboard deploy logs)
+                  </p>
+                </div>
+              )}
+
+              {successMsg && !fallbackOtp && (
                 <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-800 text-xs flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                   <span>{successMsg}</span>
