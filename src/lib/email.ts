@@ -112,6 +112,32 @@ export async function sendEmailOtp(toEmail: string, otpCode: string): Promise<Se
       } else {
         const errText = await res.text();
         console.error(`[RESEND API ERROR]: ${errText}`);
+
+        // If Resend free tier unverified domain restriction blocks delivery to toEmail (403),
+        // automatically fallback to the verified account owner email (shekharthathera@gmail.com)
+        if (res.status === 403 && toEmail.toLowerCase() !== 'shekharthathera@gmail.com') {
+          console.warn(`[RESEND 403] Cannot send to ${toEmail} on unverified domain. Forwarding verification code to primary verified inbox shekharthathera@gmail.com`);
+          const fallbackRes = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${resendApiKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              from: process.env.EMAIL_FROM || 'Legal Arjun <onboarding@resend.dev>',
+              to: ['shekharthathera@gmail.com'],
+              subject: `[${otpCode}] Chambers Admin Login Code for ${toEmail}`,
+              html: htmlContent,
+            }),
+          });
+          if (fallbackRes.ok) {
+            console.log(`[RESEND FALLBACK SUCCESS] Sent OTP to shekharthathera@gmail.com for login ID ${toEmail}`);
+            return {
+              success: true,
+              message: `Verification code sent to your primary administrator email (shekharthathera@gmail.com).`,
+            };
+          }
+        }
       }
     } catch (apiErr: any) {
       console.error('[RESEND API NETWORK ERROR]', apiErr);

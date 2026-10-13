@@ -234,6 +234,7 @@ function seedDatabase() {
   const adminEmails = [
     { email: 'Arjun@legal', name: 'Adv. Arjun Panwar (Super Admin)' },
     { email: 'shekharthathera@gmail.com', name: 'Adv. Arjun Panwar (Super Admin)' },
+    { email: 'thatherashekhar8@gmail.com', name: 'Adv. Arjun Panwar (Admin)' },
     { email: 'thatherashekhar@gmail.com', name: 'Adv. Arjun Panwar (Admin)' },
     { email: 'impzccc@gmail.com', name: 'Adv. Arjun Panwar (Admin)' },
   ];
