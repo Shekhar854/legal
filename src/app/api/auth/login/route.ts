@@ -68,7 +68,6 @@ export async function POST(request: Request) {
       tempToken,
       destinationEmail: maskEmail(destinationEmail),
       message: emailResult.message,
-      fallbackOtp: emailResult.fallbackOtp || undefined,
     });
   } catch (error: any) {
     console.error('Login Step 1 error:', error);
