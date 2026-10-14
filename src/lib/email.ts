@@ -129,7 +129,7 @@ export async function sendEmailOtp(toEmail: string, otpCode: string): Promise<Se
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: process.env.EMAIL_FROM || 'Legal Arjun <onboarding@resend.dev>',
+          from: process.env.EMAIL_FROM || 'Adv. Arjun Panwar Chambers <admin@shekharthathera.in>',
           to: [toEmail],
           subject: `[${otpCode}] Your Chambers Admin Login Verification Code`,
           html: htmlContent,
@@ -157,7 +157,7 @@ export async function sendEmailOtp(toEmail: string, otpCode: string): Promise<Se
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              from: process.env.EMAIL_FROM || 'Legal Arjun <onboarding@resend.dev>',
+              from: process.env.EMAIL_FROM || 'Adv. Arjun Panwar Chambers <admin@shekharthathera.in>',
               to: ['shekharthathera@gmail.com'],
               subject: `[${otpCode}] Chambers Admin Login Code for ${toEmail}`,
               html: htmlContent,
